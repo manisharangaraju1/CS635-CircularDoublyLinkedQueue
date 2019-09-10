@@ -1,7 +1,5 @@
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 class QueueNode {
     Process processElement;
@@ -19,7 +17,8 @@ public class CircularLinkedQueue {
     QueueNode firstNode;
     QueueNode secondNode;
     QueueNode lastNode;
-    QueueNode head; //Always points to first Node
+    QueueNode frontNode;
+    QueueNode rearNode;
 
     public CircularLinkedQueue() {
         firstNode = new QueueNode();
@@ -31,37 +30,25 @@ public class CircularLinkedQueue {
         firstNode.prev = lastNode;
         secondNode.prev = firstNode;
         lastNode.prev = secondNode;
-        head = firstNode;
+        frontNode = firstNode;
+        rearNode = firstNode;
         capacity = 3;
         nodeIndex = 0;
     }
 
 
     public void insertElement(Process processElement) {
-        if (getOccupiedNodesSize() == capacity) {
+        if (frontNode == rearNode && frontNode.processElement.getName() != null) {
             resize();
         }
-        QueueNode traverseNode = head;
-        while (traverseNode.next != head) {
-            if (traverseNode.next.processElement.name != null && traverseNode.processElement.name == null) {
-                traverseNode.processElement.name = processElement.name;
-                traverseNode.processElement.cpuTime = processElement.cpuTime;
-                traverseNode.processElement.pid = processElement.pid;
-                traverseNode.processElement.owner = processElement.owner;
-                traverseNode.processElement.numberOfThreads = processElement.numberOfThreads;
-//                System.out.println("FirstInsert : " + traverseNode.processElement.name);
-                return;
-            }
-            traverseNode = traverseNode.next;
-        }
-        if (traverseNode.next == head && traverseNode.processElement.name == null) {
-            traverseNode.processElement.name = processElement.name;
-            traverseNode.processElement.cpuTime = processElement.cpuTime;
-            traverseNode.processElement.pid = processElement.pid;
-            traverseNode.processElement.owner = processElement.owner;
-            traverseNode.processElement.numberOfThreads = processElement.numberOfThreads;
-//            System.out.println("SecondInsert : " + traverseNode.processElement.name);
-            return;
+        if (rearNode.processElement.getName() == null) {
+            rearNode.processElement.setName(processElement.getName());
+            rearNode.processElement.setOwner(processElement.getOwner());
+            rearNode.processElement.setCpuTime(processElement.getCpuTime());
+            rearNode.processElement.setPid(processElement.getPid());
+            rearNode.processElement.setNumberOfThreads(processElement.getNumberOfThreads());
+
+            rearNode = rearNode.next;
         }
     }
 
@@ -69,26 +56,26 @@ public class CircularLinkedQueue {
     public void resize() {
         for (int nodeIncreaseCount = 0; nodeIncreaseCount < capacity; nodeIncreaseCount++) {
             QueueNode newElement = new QueueNode();
-            newElement.next = head;
-            newElement.prev = head.prev;
-            head.prev.next = newElement;
-            head.prev = newElement;
-            head = newElement;
+            newElement.next = rearNode;
+            newElement.prev = rearNode.prev;
+            rearNode.prev.next = newElement;
+            rearNode.prev = newElement;
+            rearNode = rearNode.prev;
         }
         capacity *= 2;
     }
 
 
     public void deleteElement() {
-        head.prev.processElement = new Process();
-        head = head.prev;
+        frontNode.processElement = new Process();
+        frontNode = frontNode.next;
     }
 
-
     public void displayElements(String sortByAttribute) {
+
         ArrayList<Process> processList = new ArrayList<>();
-        QueueNode dummy = head;
-        while (dummy.next != head) {
+        QueueNode dummy = frontNode;
+        while (dummy.next != frontNode) {
             if (dummy.processElement.name != null) {
                 processList.add(dummy.processElement);
             }
@@ -96,47 +83,13 @@ public class CircularLinkedQueue {
         }
         if (dummy.processElement.name != null)
             processList.add(dummy.processElement);
-
-
-        switch (sortByAttribute) {
-            case "pid":
-                Collections.sort(processList, new Comparator<Process>() {
-                    @Override
-                    public int compare(Process processOne, Process processTwo) {
-                        return processOne.getPid() - processTwo.getPid();
-                    }
-                });
-            case "cpuTime":
-                Collections.sort(processList, new Comparator<Process>() {
-                    @Override
-                    public int compare(Process processOne, Process processTwo) {
-                        return processOne.getCpuTime() - processTwo.getCpuTime();
-                    }
-                });
-            case "name":
-                Collections.sort(processList, new Comparator<Process>() {
-                    @Override
-                    public int compare(Process processOne, Process processTwo) {
-                        return processOne.getName().compareTo(processTwo.getName());
-                    }
-                });
-            case "owner":
-                Collections.sort(processList, new Comparator<Process>() {
-                    @Override
-                    public int compare(Process processOne, Process processTwo) {
-                        return processOne.getOwner().compareTo(processTwo.getOwner());
-                    }
-                });
-            case "threadCount":
-                Collections.sort(processList, new Comparator<Process>() {
-                    @Override
-                    public int compare(Process processOne, Process processTwo) {
-                        return processOne.getNumberOfThreads() - processTwo.getNumberOfThreads();
-                    }
-                });
+        Process[] processes = new Process[processList.size()];
+        for (int index = 0; index < processes.length; index++) {
+            processes[index] = processList.get(index);
         }
+        new SortByOrder("pid").sort(processes, 0, processes.length - 1);
 
-        for (Process process : processList) {
+        for (Process process : processes) {
             System.out.println(process.getName());
             System.out.println(process.getOwner());
             System.out.println(process.getPid());
@@ -145,24 +98,10 @@ public class CircularLinkedQueue {
         }
     }
 
-
-    public int getOccupiedNodesSize() {
-        int size = 0;
-        QueueNode traveseNode = head;
-        while (traveseNode.next != head) {
-            if (traveseNode.processElement.name != null) {
-                size++;
-            }
-            traveseNode = traveseNode.next;
-        }
-        if (head.prev.processElement.name == null) return size;
-        return size + 1;
-    }
-
-
     public void displayElementsTest() {
-        QueueNode dummy = head;
-        while (dummy.next != head) {
+
+        QueueNode dummy = frontNode;
+        while (dummy.next != frontNode) {
 
             System.out.println(dummy.processElement.name);
             System.out.println(dummy.processElement.pid);
@@ -174,7 +113,7 @@ public class CircularLinkedQueue {
         System.out.println(dummy.processElement.pid);
         System.out.println(dummy.processElement.cpuTime);
 
-        System.out.println("HEAD :" + head.processElement.name);
+        System.out.println("FRONT NODE :" + frontNode.processElement.name);
     }
 
 
@@ -189,9 +128,15 @@ public class CircularLinkedQueue {
         clq.insertElement(processTwo);
         clq.insertElement(processThree);
         clq.insertElement(processFour);
+
+//        clq.insertElement(processFive);
+        clq.deleteElement();
         clq.insertElement(processFive);
         clq.displayElements("pid");
-        clq.deleteElement();
+        clq.insertElement(processOne);
+//        clq.displayElements("pid");
+//        clq.displayElementsTest();
+//        clq.insertElement(processOne);
 //        clq.displayElementsTest();
 //        System.out.println(clq.getSize());
     }
