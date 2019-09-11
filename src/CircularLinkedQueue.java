@@ -1,53 +1,51 @@
-
-import java.util.ArrayList;
-
 class QueueNode {
-    Process processElement;
+    Process process;
     QueueNode next;
     QueueNode prev;
 
     public QueueNode() {
-        this.processElement = new Process();
+        this.process = new Process();
     }
 }
 
 public class CircularLinkedQueue {
     int capacity;
-    int nodeIndex;
+
+    //Initial two nodes
     QueueNode firstNode;
-    QueueNode secondNode;
     QueueNode lastNode;
-    QueueNode frontNode;
-    QueueNode rearNode;
+
+    QueueNode frontNode; //frontNode always points to the front of the queue
+    QueueNode rearNode;  //rearNode always points to the node where insertion takes place
 
     public CircularLinkedQueue() {
+        //Initializing two nodes
         firstNode = new QueueNode();
-        secondNode = new QueueNode();
         lastNode = new QueueNode();
-        firstNode.next = secondNode;
-        secondNode.next = lastNode;
-        lastNode.next = firstNode;
+
+        firstNode.next = lastNode;
         firstNode.prev = lastNode;
-        secondNode.prev = firstNode;
-        lastNode.prev = secondNode;
+        lastNode.prev = firstNode;
+        lastNode.next = firstNode;
+
         frontNode = firstNode;
         rearNode = firstNode;
-        capacity = 3;
-        nodeIndex = 0;
+        capacity = 2; //initial capacity
     }
 
 
-    public void insertElement(Process processElement) {
-        if (frontNode == rearNode && frontNode.processElement.getName() != null) {
+    public void insertQueueNode(Process processToBeInserted) {
+        //Checking if all nodes are full, if yes then double the capacity of the Queue and insert the Node
+        if (frontNode == rearNode && frontNode.process.getName() != null) {
             resize();
         }
-        if (rearNode.processElement.getName() == null) {
-            rearNode.processElement.setName(processElement.getName());
-            rearNode.processElement.setOwner(processElement.getOwner());
-            rearNode.processElement.setCpuTime(processElement.getCpuTime());
-            rearNode.processElement.setPid(processElement.getPid());
-            rearNode.processElement.setNumberOfThreads(processElement.getNumberOfThreads());
-
+        if (rearNode.process.getName() == null) {
+            rearNode.process.setName(processToBeInserted.getName());
+            rearNode.process.setOwner(processToBeInserted.getOwner());
+            rearNode.process.setCpuTimeUsed(processToBeInserted.getCpuTimeUsed());
+            rearNode.process.setPid(processToBeInserted.getPid());
+            rearNode.process.setThreadCount(processToBeInserted.getThreadCount());
+            rearNode.process.setTotalCPUTime(processToBeInserted.getTotalCPUTime());
             rearNode = rearNode.next;
         }
     }
@@ -55,11 +53,11 @@ public class CircularLinkedQueue {
 
     public void resize() {
         for (int nodeIncreaseCount = 0; nodeIncreaseCount < capacity; nodeIncreaseCount++) {
-            QueueNode newElement = new QueueNode();
-            newElement.next = rearNode;
-            newElement.prev = rearNode.prev;
-            rearNode.prev.next = newElement;
-            rearNode.prev = newElement;
+            QueueNode newQueueNode = new QueueNode();
+            newQueueNode.next = rearNode;
+            newQueueNode.prev = rearNode.prev;
+            rearNode.prev.next = newQueueNode;
+            rearNode.prev = newQueueNode;
             rearNode = rearNode.prev;
         }
         capacity *= 2;
@@ -67,78 +65,13 @@ public class CircularLinkedQueue {
 
 
     public void deleteElement() {
-        frontNode.processElement = new Process();
+        frontNode.process = new Process();
         frontNode = frontNode.next;
     }
 
-    public void displayElements(String sortByAttribute) {
 
-        ArrayList<Process> processList = new ArrayList<>();
-        QueueNode dummy = frontNode;
-        while (dummy.next != frontNode) {
-            if (dummy.processElement.name != null) {
-                processList.add(dummy.processElement);
-            }
-            dummy = dummy.next;
-        }
-        if (dummy.processElement.name != null)
-            processList.add(dummy.processElement);
-        Process[] processes = new Process[processList.size()];
-        for (int index = 0; index < processes.length; index++) {
-            processes[index] = processList.get(index);
-        }
-        new SortByOrder("pid").sort(processes, 0, processes.length - 1);
-
-        for (Process process : processes) {
-            System.out.println(process.getName());
-            System.out.println(process.getOwner());
-            System.out.println(process.getPid());
-            System.out.println(process.getCpuTime());
-            System.out.println(process.getNumberOfThreads());
-        }
+    public Process[] displayElements(String sortByAttribute) {
+        SortByOrder sortByOrder = new SortByOrder(frontNode);
+        return sortByOrder.sortByAttribute(sortByAttribute);
     }
-
-    public void displayElementsTest() {
-
-        QueueNode dummy = frontNode;
-        while (dummy.next != frontNode) {
-
-            System.out.println(dummy.processElement.name);
-            System.out.println(dummy.processElement.pid);
-            System.out.println(dummy.processElement.cpuTime);
-            System.out.println("\n");
-            dummy = dummy.next;
-        }
-        System.out.println(dummy.processElement.name);
-        System.out.println(dummy.processElement.pid);
-        System.out.println(dummy.processElement.cpuTime);
-
-        System.out.println("FRONT NODE :" + frontNode.processElement.name);
-    }
-
-
-    public static void main(String[] args) {
-        CircularLinkedQueue clq = new CircularLinkedQueue();
-        Process processOne = new Process("processOne", "manisha", 100, 9, 10);
-        Process processTwo = new Process("processTwo", "mani", 200, 8, 12);
-        Process processThree = new Process("processThree", "Zee", 300, 7, 14);
-        Process processFour = new Process("processFour", "Nishu", 400, 6, 16);
-        Process processFive = new Process("processFive", "Manzee", 590, 5, 18);
-        clq.insertElement(processOne);
-        clq.insertElement(processTwo);
-        clq.insertElement(processThree);
-        clq.insertElement(processFour);
-
-//        clq.insertElement(processFive);
-        clq.deleteElement();
-        clq.insertElement(processFive);
-        clq.displayElements("pid");
-        clq.insertElement(processOne);
-//        clq.displayElements("pid");
-//        clq.displayElementsTest();
-//        clq.insertElement(processOne);
-//        clq.displayElementsTest();
-//        System.out.println(clq.getSize());
-    }
-
 }
