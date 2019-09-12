@@ -74,4 +74,5 @@ public class CircularLinkedQueue {
         SortByOrder sortByOrder = new SortByOrder(frontNode);
         return sortByOrder.sortByAttribute(sortByAttribute);
     }
+
 }

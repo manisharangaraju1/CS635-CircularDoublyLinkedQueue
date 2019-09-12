@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Comparator;
 
 public class SortByOrder {
@@ -12,6 +11,8 @@ public class SortByOrder {
     public int getNodeCount() {
         int nodeCount = 0;
         QueueNode traverseNode = frontNodeReference;
+        //traverseNode traverses through the entire queue starting from frontNode till it reaches frontNode again.
+        //Count all the nodes which are not empty
         if (traverseNode.process.getName() != null) {
             nodeCount++;
             traverseNode = traverseNode.next;
@@ -24,20 +25,19 @@ public class SortByOrder {
     }
 
     public void createProcessList() {
+        //All the non empty nodes present in the queue are added to the processList array
         processList = new Process[getNodeCount()];
-        ArrayList<Process> processes = new ArrayList<>();
+        int indexOfProcessList = 0;
         QueueNode dummy = frontNodeReference;
-        while (dummy.next != frontNodeReference) {
+        while (dummy.next != frontNodeReference && indexOfProcessList < processList.length) {
             if (dummy.process.getName() != null) {
-                processes.add(dummy.process);
+                processList[indexOfProcessList] = dummy.process;
             }
             dummy = dummy.next;
+            indexOfProcessList++;
         }
-        if (dummy.process.getName() != null)
-            processes.add(dummy.process);
-
-        for (int indexOfProcessList = 0; indexOfProcessList < processList.length; indexOfProcessList++) {
-            processList[indexOfProcessList] = processes.get(indexOfProcessList);
+        if (dummy.process.getName() != null && indexOfProcessList < processList.length) {
+            processList[indexOfProcessList] = dummy.process;
         }
     }
 
@@ -74,10 +74,10 @@ public class SortByOrder {
         if (startIndex < endIndex) {
             int middleIndex = (startIndex + endIndex) / 2;
 
-            //Sort first half of array
+            //Sort first sub array
             sort(processesToSort, startIndex, middleIndex, comparatorInstance);
 
-            //Sort Second Half of array
+            //Sort Second sub array
             sort(processesToSort, middleIndex + 1, endIndex, comparatorInstance);
 
             //merge the sorted sub arrays
@@ -107,6 +107,8 @@ public class SortByOrder {
 
         // Initial index of merged subarry array
         int indexOfProcessesArray = startIndex;
+
+        //Using the Comparator interface to compare both the process objects present in the queue
         while (indexOfLeftSubArray < leftSubArrayLength && indexOfRightSubArray < rightSubArrayLength) {
             if (comparatorInstance.compare(leftSubArray[indexOfLeftSubArray], rightSubArray[indexOfRightSubArray]) < 0) {
                 processesToSort[indexOfProcessesArray] = leftSubArray[indexOfLeftSubArray];
@@ -133,6 +135,7 @@ public class SortByOrder {
         }
     }
 
+    //Comparators which sort the objects according to different member variables
     public static class CompareByPid implements Comparator<Process> {
         @Override
         public int compare(Process processOne, Process processTwo) {

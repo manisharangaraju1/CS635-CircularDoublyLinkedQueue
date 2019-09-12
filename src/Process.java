@@ -42,13 +42,7 @@ public class Process {
         return pid;
     }
 
-    public int getPercentCPUTimeUsed() {
-        return (cpuTimeUsed/totalCPUTime) * 100;
-    }
-
-    public void setPid(int pid) {
-        this.pid = pid;
-    }
+    public void setPid(int pid) { this.pid = pid; }
 
     public int getThreadCount() {
         return threadCount;
@@ -73,4 +67,6 @@ public class Process {
     public void setTotalCPUTime(int totalCPUTime) {
         this.totalCPUTime = totalCPUTime;
     }
+
+    public int getPercentCPUTimeUsed() { return (cpuTimeUsed/totalCPUTime) * 100; }
 }
